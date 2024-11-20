@@ -1,0 +1,34 @@
+groups:
+  - name: "AWS Secrets"
+    paths:
+      include:
+        - "./"
+      ignore:
+        - "files/files"
+    files:
+      types:
+        include:
+        ignore:
+          - ".log"
+      names:
+        include:
+          - "go.mod"
+        ignore:
+          - "test.json"
+      patterns:
+        include:
+        ignore:
+          - "test_pattern"
+    texts:
+      keywords:
+        include:
+          - "secret"
+        ignore:
+          - "example_key"
+      patterns:
+        include:
+        ignore:
+       
+    entropy:
+      enable: false
+      threshold: 4
