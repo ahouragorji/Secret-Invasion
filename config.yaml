@@ -2,33 +2,68 @@ groups:
   - name: "AWS Secrets"
     paths:
       include:
-        - "./"
+        - "./" # Scan the entire current directory
       ignore:
-        - "files/files"
+        - "node_modules" # Ignore common dependency folders
+        - "logs" # Ignore log folders
+        - "test" # Ignore test directories
     files:
       types:
         include:
+          - ".env" # Environment variable files
+          - ".yaml" # YAML configuration files
+          - ".yml"
+          - ".json" # JSON configuration files
+          - ".ini" # INI configuration files
+          - ".conf" # Configuration files
+          - ".properties" # Java-style properties files
+          - ".txt" # Plain text files
         ignore:
-          - ".log"
+          - ".log" # Ignore log files
+          - ".md" # Ignore markdown documentation
       names:
         include:
-          - "go.mod"
+          - "go.mod" # Specific file to include
+          - "config.yml"
+          - "secrets.json"
+          - "credentials"
         ignore:
-          - "test.json"
+          - "test.json" # Exclude specific file
+          - "dummy_data.yml"
       patterns:
         include:
+          - ".*credentials.*" # Files with 'credentials' in their name
+          - ".*secret.*" # Files with 'secret' in their name
         ignore:
-          - "test_pattern"
+          - ".*sample.*" # Ignore files with 'sample' in their name
+          - ".*example.*" # Ignore files with 'example' in their name
     texts:
       keywords:
         include:
-          - "secret"
+          - "secret" # Common keyword
+          - "password" # Catch passwords
+          - "accessKeyId" # AWS-specific
+          - "secretAccessKey" # AWS-specific
+          - "apiKey" # General API key
+          - "private_key" # SSL/TLS private keys
+          - "token" # General tokens
+          - "oauth" # OAuth tokens
+          - "session_key" # Session keys
         ignore:
-          - "example_key"
+          - "example_key" # Ignore example placeholder keys
+          - "sample_secret"
+          - "dummy_token"
       patterns:
         include:
+          - "[a-zA-Z0-9]{20,}" # Generic pattern for long strings (e.g., tokens)
+          - "AKIA[0-9A-Z]{16}" # AWS Access Key ID
+          - "AIza[0-9A-Za-z-_]{35}" # Google API Key
+          - "ghp_[0-9A-Za-z]{36}" # GitHub Personal Access Token
+          - "eyJ[A-Za-z0-9-_]{20,}" # JWT Tokens
         ignore:
+          - "example.*" # Ignore examples
+          - "test.*"
        
     entropy:
-      enable: false
-      threshold: 4
+      enable: true 
+      threshold: 4.2 

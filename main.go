@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"math"
 	"os"
@@ -49,6 +50,7 @@ func LoadConfig(filePath string) (*Config, error) {
 	// please normalize using this formatting.
 	// I hate treating error handling as part of the MAIN code.
 	//Yes its important but as someone who reads a code I want to quickly understand the main functinoality.
+
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -86,7 +88,7 @@ func checkPathRecursively(path string, config Group) {
 	//get the needed config
 	ignorePaths := config.Paths.Ignore
 
-	fmt.Printf("you entered %s , %v\n", path, ignorePaths)
+	//fmt.Printf("you entered %s , %v\n", path, ignorePaths)
 	if isIgnored(path, ignorePaths) {
 		//fmt.Println("Ignoring path:", path)
 		return
@@ -157,7 +159,7 @@ func scanFile(path string, config Group) {
 			for _, keyword := range config.Texts.Keywords.Include {
 				// fmt.Println("checking ", keyword)
 				if strings.Contains(line, keyword) {
-					fmt.Println("secret found")
+					//fmt.Println("secret found")
 					keywordFound = true
 					break
 				}
@@ -203,6 +205,7 @@ func scanFile(path string, config Group) {
 
 		entropyOk := true
 		if config.Entropy.Enable {
+			entropyOk = false
 			words := strings.Fields(line)
 			for _, word := range words {
 				entropy := calculateEntropy(word)
@@ -227,8 +230,9 @@ func scanFile(path string, config Group) {
 	if report != "" {
 		fmt.Println(report)
 	} else {
-		//fmt.Println("No secrets found.")
+		fmt.Println("No secrets found.")
 	}
+
 }
 
 func calculateEntropy(input string) float64 {
@@ -246,12 +250,35 @@ func calculateEntropy(input string) float64 {
 }
 
 func main() {
-	config, err := LoadConfig("config.yaml")
+	configFile := flag.String("c", "config.yaml", "The configuration file, if not specified uses secretInvasionConfig environment variable or config.yaml in current directory")
+	flag.Parse()
+
+	_, err := os.Stat(*configFile)
+	if os.IsNotExist(err) {
+		fmt.Println("Specified config file doesn't exist, using environment variable secretInvasionConfig")
+
+		envFile := os.Getenv("secretInvasionConfig")
+		if envFile == "" {
+			fmt.Println("Environment variable secretInvasionConfig is not set, exiting")
+			os.Exit(1)
+		}
+
+		*configFile = envFile
+
+		_, err := os.Stat(*configFile)
+		if os.IsNotExist(err) {
+			fmt.Println("Could not find the file specified by secretInvasionConfig. Exiting")
+			os.Exit(1)
+		}
+	}
+
+	config, err := LoadConfig(*configFile)
 	if err != nil {
 		panic(err)
 	}
 
 	for _, group := range config.Groups {
+		fmt.Println("Group:", group.Name)
 		for _, path := range group.Paths.Include {
 			checkPathRecursively(path, group)
 		}
